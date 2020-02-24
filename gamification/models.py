@@ -32,6 +32,7 @@ class Transaction(models.Model):
     # ignore when delete not cascade!
     from_user = models.ForeignKey(to=get_user_model(), on_delete=models.CASCADE, related_name="from_user")
     to_user = models.ForeignKey(to=get_user_model(), on_delete=models.CASCADE, related_name="to_user")
-    category = models.ForeignKey(to=Category, on_delete=models.CASCADE, default=1)
+    category = models.ForeignKey(to=Category, on_delete=models.CASCADE)
     comment = models.TextField(default="")
     amount = models.CharField(max_length=10)
+    created_at = models.DateTimeField(auto_now_add=True)
