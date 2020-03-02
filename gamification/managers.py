@@ -1,6 +1,6 @@
 from django.contrib.auth.base_user import BaseUserManager
 from django.utils.translation import ugettext_lazy as _
-
+# from django.contrib.auth.hashers import make_password, PBKDF2SHA1PasswordHasher
 
 class CustomUserManager(BaseUserManager):
     """
@@ -9,16 +9,20 @@ class CustomUserManager(BaseUserManager):
     """
 
     def create_user(self, email, password, **extra_fields):
+        print("JIJIJI")
         """
         Create and save a User with the given email and password.
         """
         if not email:
             raise ValueError(_('The Email must be set'))
+        if not password:
+            raise ValueError(_('The Password must be set'))
         email = self.normalize_email(email)
         user = self.model(email=email, **extra_fields)
         user.set_password(password)
-        user.save()
-        return user
+        # user.set_password(make_password(password, None, hasher=PBKDF2SHA1PasswordHasher))
+        user.save(using=self._db)
+        # return self.create_user(email, password, **extra_fields)
 
     def create_superuser(self, email, password, **extra_fields):
         """

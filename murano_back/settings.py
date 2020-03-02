@@ -69,6 +69,13 @@ REST_FRAMEWORK = {
 
 from datetime import timedelta
 
+PASSWORD_HASHERS = [
+    'django.contrib.auth.hashers.PBKDF2PasswordHasher',
+    'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
+    'django.contrib.auth.hashers.Argon2PasswordHasher',
+    'django.contrib.auth.hashers.BCryptSHA256PasswordHasher',
+]
+
 ...
 
 SIMPLE_JWT = {
@@ -153,7 +160,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-AUTH_USER_MODEL = 'gamification.User'
+AUTH_USER_MODEL = 'gamification.CustomUser'
 # Internationalization
 # https://docs.djangoproject.com/en/3.0/topics/i18n/
 

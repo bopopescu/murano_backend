@@ -10,7 +10,14 @@ from .models import Transaction, Category
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = get_user_model()
-        fields = ('id', 'first_name', 'last_name', 'email', "share_points", "personal_points", 'profile')
+        fields = ('id', 'first_name', 'last_name', 'email', "share_points", "personal_points", 'profile', 'position','is_staff', 'is_teamlead')
+
+
+class UserCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = get_user_model()
+        fields = ('id', 'first_name', 'last_name', 'email', 'password', "share_points", "personal_points", 'profile', 'position','is_staff', 'is_teamlead')
+
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:

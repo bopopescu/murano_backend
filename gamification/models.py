@@ -5,16 +5,21 @@ from .managers import CustomUserManager
 from django.contrib.auth import get_user_model
 
 
-class User(AbstractUser):
+class CustomUser(AbstractUser):
     username = None
-    email = models.EmailField(_('email address'), unique=True)
+    email = models.EmailField(_('email address'), unique=True,)
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = []
+    REQUIRED_FIELDS = ['password']
     objects = CustomUserManager()
 
     profile = models.TextField(default="Blank")
+    position = models.CharField(max_length=25, default="Должность не указана")
     share_points = models.CharField(max_length=10, default=0)
     personal_points = models.CharField(max_length=10, default=0)
+    is_teamlead = models.BooleanField(default=0)
+
+
+    # image = models.ImageField(upload_to='profile_image', blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
 
