@@ -13,7 +13,14 @@ from django.contrib.auth.hashers import make_password, PBKDF2SHA1PasswordHasher
 class UserViewSet(viewsets.ModelViewSet):
     queryset = get_user_model().objects.all()
     serializer_class = UserSerializer
-    permission_classes = IsOwnerOrReadOnly, IsAdminUser,
+
+    def get_permissions(self):
+        if (self.action == 'list') or (self.action == 'update'):
+            permission_classes = [IsOwnerOrReadOnly]
+        else:
+            permission_classes = [IsAdminUser]
+        return [permission() for permission in permission_classes]
+
 
     def create(self, request, *args, **kwargs):
         print("kiki")
@@ -25,12 +32,20 @@ class UserViewSet(viewsets.ModelViewSet):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    def put(self, request, *args, **kwargs):
+        data = request.data
+        data['password'] = make_password(data['password'])
+        serializer = UserCreateSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save();
+            return self.partial_update(request, *args, **kwargs)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = IsStaffOrReadOnly,
-
-
 
 
 class TransactionsViewSet(viewsets.ReadOnlyModelViewSet):
