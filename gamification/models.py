@@ -41,3 +41,18 @@ class Transaction(models.Model):
     comment = models.TextField(default="")
     amount = models.CharField(max_length=10)
     created_at = models.DateTimeField(auto_now_add=True)
+
+# class Item(models.Model):
+#     name = models.CharField(max_length=64)
+#     description = models.TextField(default="")
+#     price = models.CharField(max_length=8)
+#     quantity = models.CharField(max_length=8)
+#     in_stock = models.BooleanField(default=10)
+#     разобраться с пикчами
+
+class FeedbackMessage(models.Model):
+    topic = models.CharField(max_length=64)
+    text = models.TextField()
+    author = models.ForeignKey(to=get_user_model(), on_delete=models.CASCADE)
+    closed = models.BooleanField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)

@@ -1,5 +1,5 @@
 from django.conf.urls import include, url
-from gamification.views import UserViewSet, TransactionsViewSet, CategoryViewSet
+from gamification.views import UserViewSet, TransactionsViewSet, CategoryViewSet, FeedbackMessageViewSet
 
 from rest_framework import routers
 
@@ -12,6 +12,7 @@ from rest_framework_simplejwt.views import (
 router = routers.DefaultRouter()
 router.register(r'users', viewset=UserViewSet)
 router.register(r'categories', viewset=CategoryViewSet)
+router.register(r'feedbackmessages', viewset=FeedbackMessageViewSet)
 
 urlpatterns =[
     url(r'^', include(router.urls)),
