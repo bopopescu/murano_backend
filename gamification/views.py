@@ -37,16 +37,16 @@ class UserViewSet(viewsets.ModelViewSet):
 
     def partial_update(self, request, *args, **kwargs):
         data = request.data
-        # print("2")
-        # print(data['password'])
-        data['password'] = make_password(data['password'])
-        serializer = UserCreateSerializer(data=data, partial=True)
+        if 'password' in data:
+            data['password'] = make_password(data['password'])
+        # data['password'] = make_password(data['password'])
+        serializer = UserCreateSerializer(request.user, data=request.data, partial=True)
         if serializer.is_valid():
             instance, created = get_user_model().objects.update_or_create(email=serializer.validated_data.get('email', None),
                                                                     defaults=serializer.validated_data)
             if not created:
                 serializer.update(instance, serializer.validated_data)
-            return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
+            return Response(request.data, status=status.HTTP_202_ACCEPTED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -87,7 +87,7 @@ class TransactionsViewSet(viewsets.ReadOnlyModelViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class FeedbackMessageViewSet(viewsets.ModelViewSet):
-    queryset = FeedbackMessage.objects.all()
+    queryset = FeedbackMessage.objects.all().order_by('created_at').reverse()
     serializer_class = FeedbackMessageSerializer
 
     def get_permissions(self):
@@ -119,7 +119,7 @@ class FeedbackMessageViewSet(viewsets.ModelViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-@background(schedule=1)
+#
 def job():
     print("I'm working...")
 #

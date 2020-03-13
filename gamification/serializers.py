@@ -27,6 +27,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
         fields = ('id', 'first_name', 'last_name', 'email', 'password', "share_points", "personal_points", 'profile', 'position','is_staff', 'is_teamlead')
         extra_kwargs = {'email': {'validators': [EmailValidator, ]},}
 
+
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
