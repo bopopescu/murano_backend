@@ -19,5 +19,7 @@ urlpatterns =[
     url(r'^auth/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     url(r'^auth/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     url(r'^transactions/', TransactionsViewSet.as_view({'post':'post', 'get':'list' } ), name='add transaction'),
+    url(r'^supertransactions/', TransactionsViewSet.superpost, name='superpost'),
+
     # url(r'^auth/datatoken/', MyTokenObtainPairView.as_view(), name='datatoken_obtain_pair_and_user'),
 ]

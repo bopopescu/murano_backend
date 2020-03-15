@@ -11,6 +11,9 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from .permissions import IsStaffOrReadOnly, IsOwnerOrReadOnly
 from django.contrib.auth.hashers import make_password, PBKDF2SHA1PasswordHasher
 
+from django.db import models
+from rest_framework.decorators import api_view
+
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -66,18 +69,17 @@ class TransactionsViewSet(viewsets.ReadOnlyModelViewSet):
 
     def post(self, request, format=None):
         serializer = TransactionSerializer(data=request.data)
+        from_user = request.user.pk
+        request.data['from_user'] = from_user
+        request.data['category'] = 1
+        # сделать гет по имени категории
         if serializer.is_valid():
-            from_user = request.data['from_user']
             to_user = request.data['to_user']
             amount = int(request.data['amount'])
-            comment = request.data['comment']
-            category_id = request.data['category']
             From_User = get_user_model().objects.get(pk=from_user)
             To_User = get_user_model().objects.get(pk=to_user)
-            if int(From_User.share_points)< amount:
+            if int(From_User.share_points) < amount:
                 return HttpResponseBadRequest({'Недостаточно средств'})
-            # проверка на статус пользователя добавить
-
             To_User.personal_points = str(int(To_User.personal_points) + amount)
             From_User.share_points = str(int(From_User.share_points) - amount)
             To_User.save()
@@ -85,6 +87,62 @@ class TransactionsViewSet(viewsets.ReadOnlyModelViewSet):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @api_view(['POST'])
+    def superpost(request, format=None):
+        data = request.data
+        data['from_user'] = request.user.pk
+        upd_users = data['to_user']
+
+
+        if data['amount'] not in [10,15,20]:
+            return HttpResponseBadRequest({'Not valid amount of points'})
+
+        s_data = []
+        for to_user in upd_users:
+            data['to_user'] = to_user
+            line = data.copy()
+            s_data.append(line)
+
+        serializer = TransactionSerializer(data=s_data, many=True)
+        if serializer.is_valid():
+            users = get_user_model().objects.filter(pk__in=upd_users)
+            for to_user in users:
+                to_user.personal_points = str(int(to_user.personal_points) + data['amount'])
+                to_user.save()
+            serializer.save()
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+
+
+        print(len(users))
+        print(category.name)
+
+
+
+
+
+        # сделать гет по имени категории
+
+        # serializer = TransactionSerializer(data=request.data)
+        # if serializer.is_valid():
+        #     to_user = request.data['to_user']
+        #     amount = int(request.data['amount'])
+        #     From_User = get_user_model().objects.get(pk=from_user)
+        #     To_User = get_user_model().objects.get(pk=to_user)
+        #     if int(From_User.share_points) < amount:
+        #         return HttpResponseBadRequest({'Недостаточно средств'})
+        #     To_User.personal_points = str(int(To_User.personal_points) + amount)
+        #     From_User.share_points = str(int(From_User.share_points) - amount)
+        #     To_User.save()
+        #     From_User.save()
+        #     serializer.save()
+        #     return Response(serializer.data, status=status.HTTP_201_CREATED)
+        # return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class FeedbackMessageViewSet(viewsets.ModelViewSet):
     queryset = FeedbackMessage.objects.all().order_by('created_at').reverse()
@@ -100,11 +158,9 @@ class FeedbackMessageViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
 
         data = request.data
-        print("gg")
         print(request.user.pk)
-        print("gg")
         data['author'] = request.user.pk
-        print(data)
+
         # new_fb = form.save()
         # profile = profileform.save(commit=False)
         # if profile.user_id is None:
