@@ -142,6 +142,15 @@ DATABASES = {
 }
 
 
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+DEFAULT_FROM_EMAIL = 'muranomailer@mail.ru'
+EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp.mail.ru'
+EMAIL_HOST_USER = 'muranomailer@mail.ru'
+EMAIL_HOST_PASSWORD = 'Development123'
+EMAIL_PORT = 587
+
+
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
 

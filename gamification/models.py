@@ -30,7 +30,9 @@ class CustomUser(AbstractUser):
     # REQUIRED_FIELDS = ['first_name', 'last_name', "status", "is_staff", "points", "profile"]
 
 class Category(models.Model):
-    name = models.CharField(max_length=64)
+    name = models.CharField(max_length=64, unique=True)
+    values = models.CharField(max_length=64, default='1,2,3,4,5,6,7,8,9,10')
+
 
 class Transaction(models.Model):
 
@@ -42,13 +44,19 @@ class Transaction(models.Model):
     amount = models.CharField(max_length=10)
     created_at = models.DateTimeField(auto_now_add=True)
 
-# class Item(models.Model):
+
+# class Product(models.Model):
 #     name = models.CharField(max_length=64)
 #     description = models.TextField(default="")
 #     price = models.CharField(max_length=8)
 #     quantity = models.CharField(max_length=8)
 #     in_stock = models.BooleanField(default=10)
-#     разобраться с пикчами
+#
+#
+# class ProductImage(models.Model):
+#     product = models.ForeignKey(Product, verbose_name='Товар', related_name='images')
+#     image = models.ImageField('Изображение', upload_to='images')
+
 
 class FeedbackMessage(models.Model):
     topic = models.CharField(max_length=64)

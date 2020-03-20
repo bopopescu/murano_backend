@@ -1,5 +1,5 @@
 from django.conf.urls import include, url
-from gamification.views import UserViewSet, TransactionsViewSet, CategoryViewSet, FeedbackMessageViewSet
+from gamification.views import UserViewSet, TransactionsViewSet, CategoryViewSet, FeedbackMessageViewSet, ExcelHandler
 
 from rest_framework import routers
 
@@ -20,6 +20,7 @@ urlpatterns =[
     url(r'^auth/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     url(r'^transactions/', TransactionsViewSet.as_view({'post':'post', 'get':'list' } ), name='add transaction'),
     url(r'^supertransactions/', TransactionsViewSet.superpost, name='superpost'),
+    url(r'^excel/', ExcelHandler.as_view({'post':'export_xls'}), name='excel_gen'),
 
     # url(r'^auth/datatoken/', MyTokenObtainPairView.as_view(), name='datatoken_obtain_pair_and_user'),
 ]
