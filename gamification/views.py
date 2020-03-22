@@ -1,8 +1,8 @@
 from rest_framework import viewsets
 from gamification.serializers import UserSerializer, TransactionSerializer, CategorySerializer, \
-    UserCreateSerializer, FeedbackMessageSerializer, UserFIOSerializer, CreateFeedbackMessageSerializer
+    UserCreateSerializer, FeedbackMessageSerializer, UserFIOSerializer, CreateFeedbackMessageSerializer, ProductSerializer
 from django.contrib.auth import get_user_model
-from  .models import Category, Transaction, FeedbackMessage
+from  .models import Category, Transaction, FeedbackMessage, Product
 from rest_framework.response import Response
 from rest_framework import status
 from django.http import HttpResponseBadRequest, HttpResponse
@@ -10,7 +10,8 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from .permissions import IsStaffOrReadOnly, IsOwnerOrReadOnly
 from django.contrib.auth.hashers import make_password, PBKDF2SHA1PasswordHasher
 from django.core import mail
-import xlwt, os, pandas
+import xlwt, os, pandas, base64
+from rest_framework.renderers import JSONRenderer
 
 
 from rest_framework.decorators import api_view
@@ -308,4 +309,28 @@ class ExcelHandler(viewsets.ViewSet):
 
 
 
+class ProductViewSet(viewsets.ModelViewSet):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+    permission_classes = IsStaffOrReadOnly,
 
+
+    def create(self, request, *args, **kwargs):
+        serializer = ProductSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+    def partial_update(self, request, *args, **kwargs):
+        serializer = ProductSerializer(data=request.data, partial=True)
+        if serializer.is_valid():
+            instance = Product.objects.get(pk=request.data['id'])
+            serializer.update(instance, serializer.validated_data)
+
+            # serializer2 = ProductSerializer(request.user, data=request.data, partial=True)
+            # json = JSONRenderer().render(instance)
+            return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

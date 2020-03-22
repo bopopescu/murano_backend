@@ -45,16 +45,17 @@ class Transaction(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
 
-# class Product(models.Model):
-#     name = models.CharField(max_length=64)
-#     description = models.TextField(default="")
-#     price = models.CharField(max_length=8)
-#     quantity = models.CharField(max_length=8)
-#     in_stock = models.BooleanField(default=10)
-#
-#
+class Product(models.Model):
+    name = models.CharField(max_length=64)
+    description = models.TextField(default="")
+    price = models.CharField(max_length=8)
+    quantity = models.CharField(max_length=8)
+    in_stock = models.BooleanField(default=1)
+    image = models.ImageField('Изображение', upload_to='images/products')
+
+
 # class ProductImage(models.Model):
-#     product = models.ForeignKey(Product, verbose_name='Товар', related_name='images')
+#     product = models.ForeignKey(Product, verbose_name='Товар', related_name='images', on_delete=models.CASCADE)
 #     image = models.ImageField('Изображение', upload_to='images')
 
 

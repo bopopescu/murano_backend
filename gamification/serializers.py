@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.core.validators import EmailValidator
 from django.contrib.auth import get_user_model
-from .models import Transaction, Category, FeedbackMessage
+from .models import Transaction, Category, FeedbackMessage, Product
 
 
 
@@ -56,3 +56,11 @@ class CreateFeedbackMessageSerializer(serializers.ModelSerializer):
         model = FeedbackMessage
         exclude = []
         fields = '__all__'
+
+
+class ProductSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Product
+        fields = '__all__'
+
