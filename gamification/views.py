@@ -1,8 +1,9 @@
 from rest_framework import viewsets
 from gamification.serializers import UserSerializer, TransactionSerializer, CategorySerializer, \
-    UserCreateSerializer, FeedbackMessageSerializer, UserFIOSerializer, CreateFeedbackMessageSerializer, ProductSerializer
+    UserCreateSerializer, FeedbackMessageSerializer, UserFIOSerializer, CreateFeedbackMessageSerializer, ProductSerializer,\
+    OrderProductSerializer, OrderCreateSerializer, OrderSerializer
 from django.contrib.auth import get_user_model
-from  .models import Category, Transaction, FeedbackMessage, Product
+from  .models import Category, Transaction, FeedbackMessage, Product, Order, OrderProduct
 from rest_framework.response import Response
 from rest_framework import status
 from django.http import HttpResponseBadRequest, HttpResponse
@@ -327,10 +328,27 @@ class ProductViewSet(viewsets.ModelViewSet):
     def partial_update(self, request, *args, **kwargs):
         serializer = ProductSerializer(data=request.data, partial=True)
         if serializer.is_valid():
-            instance = Product.objects.get(pk=request.data['id'])
+            # instance = Product.objects.get(pk=request.data['id'])
+            instance = self.get_object()
             serializer.update(instance, serializer.validated_data)
 
-            # serializer2 = ProductSerializer(request.user, data=request.data, partial=True)
-            # json = JSONRenderer().render(instance)
             return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class OrderViewSet(viewsets.ModelViewSet):
+    queryset = Order.objects.all()
+    serializer_class = OrderSerializer
+
+    def create(self, request, *args, **kwargs):
+        data = request.data
+        data['customer'] = request.user.pk
+        serializer = OrderCreateSerializer(data=data)
+        if serializer.is_valid():
+            order = serializer.save()
+            serializer = OrderCreateSerializer(order)
+            return Response({'data':'f'}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+

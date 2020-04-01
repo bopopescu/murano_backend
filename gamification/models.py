@@ -65,3 +65,20 @@ class FeedbackMessage(models.Model):
     author = models.ForeignKey(to=get_user_model(), on_delete=models.CASCADE)
     closed = models.BooleanField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
+
+class Order(models.Model):
+    customer = models.ForeignKey(to=get_user_model(), on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    delivered_at = models.DateTimeField(blank=True, null=True)
+    active = models.BooleanField(default=1)
+    total = models.CharField(max_length=8)
+
+
+
+class OrderProduct(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.IntegerField(default=1)
+
+    class Meta:
+        unique_together = ('order', 'product')

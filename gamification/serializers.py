@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.core.validators import EmailValidator
 from django.contrib.auth import get_user_model
-from .models import Transaction, Category, FeedbackMessage, Product
+from .models import Transaction, Category, FeedbackMessage, Product, Order, OrderProduct
 
 
 
@@ -63,4 +63,59 @@ class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = '__all__'
+
+
+class OrderProductSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = OrderProduct
+        fields = ('product', 'quantity')
+
+
+class OrderProductSerializerRetriever(serializers.ModelSerializer):
+
+    class Meta:
+        model = OrderProduct
+        depth = 1
+        fields = ('product', 'quantity')
+
+class OrderCreateSerializer(serializers.ModelSerializer):
+    products = OrderProductSerializer(many=True)
+
+    class Meta:
+        model = Order
+        fields = ('customer', 'products')
+
+    def create(self, validated_data):
+        total = 0
+        products = validated_data.pop('products')
+        customer = validated_data['customer']
+        for each in products:
+            total += int(each['product'].price) * int(each['quantity'])
+        if total > int(customer.personal_points):
+            raise serializers.ValidationError('Not enough points')
+        customer.personal_points = int(customer.personal_points)-total
+        question = Order.objects.create(**validated_data)
+        choice_set_serializer = self.fields['products']
+
+        for each in products:
+            print(each)
+            total += int(each['product'].price) * int(each['quantity'])
+            each['order'] = question
+        op = choice_set_serializer.create(products)
+        question.total = total
+        question.save()
+        customer.save()
+        return question
+
+
+
+class OrderSerializer(serializers.ModelSerializer):
+    customer = UserFIOSerializer(many=False, read_only=True)
+    products = OrderProductSerializerRetriever(source='orderproduct_set', many= True)
+    class Meta:
+        model = Order
+        fields = "__all__"
+
+
 
