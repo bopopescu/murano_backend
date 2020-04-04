@@ -109,13 +109,23 @@ class OrderCreateSerializer(serializers.ModelSerializer):
         return question
 
 
-
 class OrderSerializer(serializers.ModelSerializer):
     customer = UserFIOSerializer(many=False, read_only=True)
-    products = OrderProductSerializerRetriever(source='orderproduct_set', many= True)
+    products = OrderProductSerializerRetriever(source='orderproduct_set', many= True, read_only=True)
     class Meta:
         model = Order
+
         fields = "__all__"
+
+
+class OrderStatusSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Order
+        fields = ['id', 'active', 'delivered_at']
+        extra = ['id']
+
+
 
 
 
