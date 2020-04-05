@@ -93,7 +93,7 @@ class OrderCreateSerializer(serializers.ModelSerializer):
         for each in products:
             total += int(each['product'].price) * int(each['quantity'])
         if total > int(customer.personal_points):
-            raise serializers.ValidationError('Not enough points')
+            raise serializers.ValidationError('Недостаточно средств')
         customer.personal_points = int(customer.personal_points)-total
         question = Order.objects.create(**validated_data)
         choice_set_serializer = self.fields['products']
