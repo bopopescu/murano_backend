@@ -42,7 +42,7 @@ ADMIN_MEDIA_PREFIX = '/static/admin/'
 SECRET_KEY = '3n#tq)1=^!ez1nr-e(fp@=4&p1^h)qxw&q@ipy0q1vgd_f2lh4'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 # Honor the 'X-Forwarded-Proto' header for request.is_secure()
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
