@@ -16,7 +16,7 @@ import xlwt, os, base64
 from django.shortcuts import render
 from django.utils import timezone
 
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 
 from rest_framework.throttling import UserRateThrottle
 
@@ -52,13 +52,22 @@ class UserViewSet(viewsets.ModelViewSet):
         # data['password'] = make_password(data['password'])
         serializer = UserCreateSerializer(request.user, data=request.data, partial=True)
         if serializer.is_valid():
-            instance, created = get_user_model().objects.update_or_create(
-                email=serializer.validated_data.get('email', None),
-                defaults=serializer.validated_data)
-            if not created:
-                serializer.update(instance, serializer.validated_data)
+            instance = self.get_object()
+            serializer.update(instance, serializer.validated_data)
+
             return Response(request.data, status=status.HTTP_202_ACCEPTED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+    @api_view(['POST'])
+    @permission_classes([IsAdminUser])
+    def month_update (request, format=None):
+        users = get_user_model().objects.all()
+        for user in users:
+            user.share_points = '10'
+            user.save()
+
+        return Response('success', status=status.HTTP_202_ACCEPTED)
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
@@ -318,7 +327,8 @@ class ProductViewSet(viewsets.ModelViewSet):
             instance = self.get_object()
             serializer.update(instance, serializer.validated_data)
 
-            return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
+            # return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
+            return Response("idk how return form data", status=status.HTTP_202_ACCEPTED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -330,7 +340,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         if (self.action == 'create'):
             permission_classes = [IsAuthenticated]
         else:
-            permission_classes = [IsStaff]
+            permission_classes = [IsAdminUser]
         return [permission() for permission in permission_classes]
 
     def create(self, request, *args, **kwargs):
