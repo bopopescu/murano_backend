@@ -2,9 +2,9 @@ from rest_framework import viewsets
 from gamification.serializers import UserSerializer, TransactionSerializer, CategorySerializer, \
     UserCreateSerializer, FeedbackMessageSerializer, UserFIOSerializer, CreateFeedbackMessageSerializer, \
     ProductSerializer, \
-    OrderProductSerializer, OrderCreateSerializer, OrderSerializer, OrderStatusSerializer
+    OrderProductSerializer, OrderCreateSerializer, OrderSerializer, OrderStatusSerializer, UserBadgeSerializer
 from django.contrib.auth import get_user_model
-from .models import Category, Transaction, FeedbackMessage, Product, Order, OrderProduct
+from .models import Category, Transaction, FeedbackMessage, Product, Order, OrderProduct, UserBadge
 from rest_framework.response import Response
 from rest_framework import status
 from django.http import HttpResponseBadRequest, HttpResponse
@@ -16,7 +16,7 @@ import xlwt, os, base64
 from django.shortcuts import render
 from django.utils import timezone
 
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, action
 
 from rest_framework.throttling import UserRateThrottle
 
@@ -68,6 +68,43 @@ class UserViewSet(viewsets.ModelViewSet):
             user.save()
 
         return Response('success', status=status.HTTP_202_ACCEPTED)
+
+    @action(methods=['post'], detail=False, permission_classes=[IsAuthenticated])
+    def add_interest(self, request,):
+        print(request)
+        data = request.data
+        data['user'] = request.user.pk
+        try:
+            b = UserBadge.objects.get(user=data['user'], badge=data['badge'])
+        except UserBadge.DoesNotExist:
+            b = None
+
+        if b == None:
+            serializer = UserBadgeSerializer(data=data)
+            if serializer.is_valid():
+                serializer.save()
+            # obj, created = UserBadge.objects.get_or_create(user=serializer.validated_data['user'] ,
+            #                                                badge=serializer.validated_data['badge'] )
+                return Response('added', status=status.HTTP_202_ACCEPTED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            b.delete()
+            return Response('excluded', status=status.HTTP_202_ACCEPTED)
+
+    @action(methods=['get'], detail=True, permission_classes=[IsAuthenticated])
+    def interests (self, request, pk=None):
+
+
+        obj = get_user_model().objects.get(pk=pk)
+        queryset = UserBadge.objects.filter(user=obj).values('badge')
+        interests = []
+        for i in queryset:
+            interests.append(i['badge'])
+
+        return Response(interests)
+        #
+        # return Response('success', status=status.HTTP_202_ACCEPTED)
+
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
@@ -370,6 +407,11 @@ class OrderViewSet(viewsets.ModelViewSet):
             resp['id'] = self.get_object().pk
             return Response(resp, status=status.HTTP_202_ACCEPTED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# class InterestViewSet(viewsets.ModelViewSet):
+#     queryset = Interest.objects.all().order_by('created_at').reverse()
+#     serializer_class = InterestSerializer
 
 
 def start(request):

@@ -25,6 +25,7 @@ urlpatterns =[
     url(r'^supertransactions/', TransactionsViewSet.superpost, name='superpost'),
     url(r'^sharepoints/', UserViewSet.month_update, name='month_upd'),
     url(r'^excel/', ExcelHandler.as_view({'post':'export_xls'}), name='excel_gen'),
+    # url(r'^interests/', UserViewSet.as_view({'post':'add_interest', 'get':'get_interest'})),
 
 
     # url(r'^auth/datatoken/', MyTokenObtainPairView.as_view(), name='datatoken_obtain_pair_and_user'),

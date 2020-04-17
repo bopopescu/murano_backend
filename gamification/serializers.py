@@ -1,8 +1,8 @@
 from rest_framework import serializers
 from django.core.validators import EmailValidator
 from django.contrib.auth import get_user_model
-from .models import Transaction, Category, FeedbackMessage, Product, Order, OrderProduct
-
+from .models import Transaction, Category, FeedbackMessage, Product, Order, OrderProduct, UserBadge
+from rest_framework.validators import UniqueTogetherValidator
 
 
 
@@ -124,6 +124,31 @@ class OrderStatusSerializer(serializers.ModelSerializer):
         model = Order
         fields = ['id', 'active', 'delivered_at']
         extra = ['id']
+
+
+class UserBadgeSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = UserBadge
+        fields = ['id', 'user', 'badge']
+
+        validators = [
+            UniqueTogetherValidator(
+                queryset=UserBadge.objects.all(),
+                fields=['user', 'badge']
+            )
+        ]
+
+    def validate_badge(self, value):
+        """
+        Check that the blog post is about Django.
+        """
+        if value not in ['local_movies','menu_book','pets', 'local_bar', 'smoking_rooms', 'sports_soccer',
+                         'sports_esports', 'code', 'fitness_center', 'local_pizza', 'duo', 'extension',
+                         'fiber_new', 'directions_car', 'local_hospital', 'live_help']:
+            raise serializers.ValidationError("This badge is not avalible")
+
+        return value
 
 
 

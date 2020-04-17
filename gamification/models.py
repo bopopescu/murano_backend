@@ -82,3 +82,10 @@ class OrderProduct(models.Model):
 
     class Meta:
         unique_together = ('order', 'product')
+
+class UserBadge(models.Model):
+    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
+    badge = models.CharField(max_length=64)
+
+    class Meta:
+        unique_together = ('user', 'badge')
