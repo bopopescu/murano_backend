@@ -30,10 +30,14 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
 
     def get_permissions(self):
+
         if (self.action == 'list') or (self.action == 'update'):
             permission_classes = [IsOwnerOrReadOnly]
         else:
-            permission_classes = [IsAdminUser]
+            if (self.action == 'add_interest') or (self.action == 'interests'):
+                permission_classes =[IsAuthenticated]
+            else:
+                permission_classes = [IsAdminUser]
         return [permission() for permission in permission_classes]
 
     def create(self, request, *args, **kwargs):
@@ -69,8 +73,9 @@ class UserViewSet(viewsets.ModelViewSet):
 
         return Response('success', status=status.HTTP_202_ACCEPTED)
 
-    @action(methods=['post'], detail=False, permission_classes=[IsAuthenticated])
-    def add_interest(self, request,):
+    # @permission_classes([IsAuthenticated])
+    @action(methods=['post'], detail=False)
+    def add_interest(self, request):
         print(request)
         data = request.data
         data['user'] = request.user.pk
@@ -91,7 +96,7 @@ class UserViewSet(viewsets.ModelViewSet):
             b.delete()
             return Response('excluded', status=status.HTTP_202_ACCEPTED)
 
-    @action(methods=['get'], detail=True, permission_classes=[IsAuthenticated])
+    @action(methods=['get'], detail=True)
     def interests (self, request, pk=None):
 
 
